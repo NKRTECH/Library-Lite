@@ -15,7 +15,7 @@ A simple web application for managing a library's books and members.
 
 1. Install dependencies: `npm install`
 2. Start the development server: `npm run dev`
-3. Open http://localhost:5174 in your browser
+3. Open http://localhost:5173 in your browser
 
 ## Assumptions
 
