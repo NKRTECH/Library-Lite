@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLibrary } from '../../context/LibraryContext';
+import { Card, CardContent, Typography, TextField, Button, Alert } from '@mui/material';
 
 const AddBook = () => {
   const { addBook } = useLibrary();
@@ -22,34 +23,38 @@ const AddBook = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow mb-4">
-      <h2 className="text-xl font-bold mb-2">Add Book</h2>
-      {error && <p className="text-red-500 mb-2">{error}</p>}
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={e => setTitle(e.target.value)}
-        required
-        className="border p-2 w-full mb-2"
-      />
-      <input
-        type="text"
-        placeholder="Author"
-        value={author}
-        onChange={e => setAuthor(e.target.value)}
-        required
-        className="border p-2 w-full mb-2"
-      />
-      <input
-        type="text"
-        placeholder="Tags (comma separated)"
-        value={tags}
-        onChange={e => setTags(e.target.value)}
-        className="border p-2 w-full mb-2"
-      />
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Add Book</button>
-    </form>
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>Add Book</Typography>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Title"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Author"
+            value={author}
+            onChange={e => setAuthor(e.target.value)}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Tags (comma separated)"
+            value={tags}
+            onChange={e => setTags(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>Add Book</Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

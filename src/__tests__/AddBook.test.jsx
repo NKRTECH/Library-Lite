@@ -26,9 +26,9 @@ describe('AddBook', () => {
         <AddBook />
       </LibraryProvider>
     );
-    expect(screen.getByPlaceholderText('Title')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Author')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Tags (comma separated)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Title *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Author *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Tags (comma separated)')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /add book/i })).toBeInTheDocument();
   });
 
@@ -38,9 +38,9 @@ describe('AddBook', () => {
         <AddBook />
       </LibraryProvider>
     );
-    fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'Test Book' } });
-    fireEvent.change(screen.getByPlaceholderText('Author'), { target: { value: 'Test Author' } });
-    fireEvent.change(screen.getByPlaceholderText('Tags (comma separated)'), { target: { value: 'fiction' } });
+    fireEvent.change(screen.getByLabelText('Title *'), { target: { value: 'Test Book' } });
+    fireEvent.change(screen.getByLabelText('Author *'), { target: { value: 'New Author' } });
+    fireEvent.change(screen.getByLabelText('Tags (comma separated)'), { target: { value: 'fiction' } });
     fireEvent.click(screen.getByRole('button', { name: /add book/i }));
     expect(localStorageMock.setItem).toHaveBeenCalled();
   });
@@ -52,8 +52,8 @@ describe('AddBook', () => {
         <AddBook />
       </LibraryProvider>
     );
-    fireEvent.change(screen.getByPlaceholderText('Title'), { target: { value: 'Test Book' } });
-    fireEvent.change(screen.getByPlaceholderText('Author'), { target: { value: 'New Author' } });
+    fireEvent.change(screen.getByLabelText('Title *'), { target: { value: 'Test Book' } });
+    fireEvent.change(screen.getByLabelText('Author *'), { target: { value: 'New Author' } });
     fireEvent.click(screen.getByRole('button', { name: /add book/i }));
     expect(screen.getByText('Book with this title already exists')).toBeInTheDocument();
   });

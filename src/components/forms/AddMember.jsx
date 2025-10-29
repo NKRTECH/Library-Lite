@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLibrary } from '../../context/LibraryContext';
+import { Card, CardContent, Typography, TextField, Button, Alert } from '@mui/material';
 
 const AddMember = () => {
   const { addMember } = useLibrary();
@@ -20,27 +21,31 @@ const AddMember = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow mb-4">
-      <h2 className="text-xl font-bold mb-2">Add Member</h2>
-      {error && <p className="text-red-500 mb-2">{error}</p>}
-      <input
-        type="text"
-        placeholder="First Name"
-        value={firstName}
-        onChange={e => setFirstName(e.target.value)}
-        required
-        className="border p-2 w-full mb-2"
-      />
-      <input
-        type="text"
-        placeholder="Last Name"
-        value={lastName}
-        onChange={e => setLastName(e.target.value)}
-        required
-        className="border p-2 w-full mb-2"
-      />
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Add Member</button>
-    </form>
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>Add Member</Typography>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="First Name"
+            value={firstName}
+            onChange={e => setFirstName(e.target.value)}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Last Name"
+            value={lastName}
+            onChange={e => setLastName(e.target.value)}
+            required
+            fullWidth
+            margin="normal"
+          />
+          <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>Add Member</Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

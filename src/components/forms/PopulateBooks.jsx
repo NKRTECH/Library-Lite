@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLibrary } from '../../context/LibraryContext';
+import { Card, CardContent, Typography, TextField, Button, Alert, CircularProgress } from '@mui/material';
 
 const PopulateBooks = () => {
   const { addBook } = useLibrary();
@@ -18,7 +19,9 @@ const PopulateBooks = () => {
         const book = {
           title: item.volumeInfo.title,
           author: item.volumeInfo.authors ? item.volumeInfo.authors[0] : 'Unknown',
-          tags: [genre]
+          tags: [genre],
+          // mark as populated so users can clear these later if desired
+          source: 'google-populate'
         };
         try {
           addBook(book);
@@ -35,24 +38,29 @@ const PopulateBooks = () => {
   };
 
   return (
-    <div className="bg-white p-4 rounded shadow mb-4">
-      <h2 className="text-xl font-bold mb-2">Populate Books</h2>
-      {error && <p className="text-red-500 mb-2">{error}</p>}
-      <input
-        type="text"
-        placeholder="Genre"
-        value={genre}
-        onChange={e => setGenre(e.target.value)}
-        className="border p-2 mr-2"
-      />
-      <button
-        onClick={handlePopulate}
-        disabled={loading}
-        className="bg-purple-500 text-white px-4 py-2 rounded disabled:opacity-50"
-      >
-        {loading ? 'Loading...' : 'Populate Books'}
-      </button>
-    </div>
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>Populate Books</Typography>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        <TextField
+          label="Genre"
+          value={genre}
+          onChange={e => setGenre(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <Button
+          onClick={handlePopulate}
+          disabled={loading}
+          variant="contained"
+          color="secondary"
+          sx={{ mt: 2 }}
+          startIcon={loading ? <CircularProgress size={20} /> : null}
+        >
+          {loading ? 'Loading...' : 'Populate Books'}
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -39,7 +39,7 @@ describe('Catalog', () => {
         <Catalog />
       </LibraryProvider>
     );
-    const searchInput = screen.getByPlaceholderText('Search by title');
+    const searchInput = screen.getByLabelText('Search by title');
     fireEvent.change(searchInput, { target: { value: 'Harry' } });
     expect(screen.getByText('Harry Potter')).toBeInTheDocument();
     expect(screen.queryByText('The Hobbit')).not.toBeInTheDocument();

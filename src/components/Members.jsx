@@ -1,29 +1,36 @@
 import { useLibrary } from '../context/LibraryContext';
+import { Grid, Card, CardContent, Typography, List, ListItem, ListItemText } from '@mui/material';
 import AddMember from './forms/AddMember';
 
 const Members = () => {
   const { members, books } = useLibrary();
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Members</h1>
+    <div>
+      <Typography variant="h4" gutterBottom>Members</Typography>
       <AddMember />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <Grid container spacing={2}>
         {members.map(member => {
           const activeLoans = books.filter(book => book.loanedTo === member.id);
           return (
-            <div key={member.id} className="bg-white p-4 rounded shadow">
-              <h2 className="font-bold">{member.firstName} {member.lastName}</h2>
-              <h3 className="font-semibold">Active Loans:</h3>
-              <ul className="list-disc list-inside">
-                {activeLoans.map(book => (
-                  <li key={book.id}>{book.title} - Due: {book.dueDate ? new Date(book.dueDate).toLocaleDateString() : 'N/A'}</li>
-                ))}
-              </ul>
-            </div>
+            <Grid key={member.id} size={{ xs: 12, sm: 6, md: 4 }}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">{member.firstName} {member.lastName}</Typography>
+                  <Typography variant="subtitle1">Active Loans:</Typography>
+                  <List dense>
+                    {activeLoans.map(book => (
+                      <ListItem key={book.id}>
+                        <ListItemText primary={book.title} secondary={`Due: ${book.dueDate ? new Date(book.dueDate).toLocaleDateString() : 'N/A'}`} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
           );
         })}
-      </div>
+      </Grid>
     </div>
   );
 };

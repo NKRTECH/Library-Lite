@@ -1,67 +1,105 @@
 import { useState } from 'react';
 import { useLibrary } from '../context/LibraryContext';
+import { Grid, Card, CardContent, Typography, TextField, Button, Select, MenuItem, FormControl, InputLabel, Snackbar, Alert } from '@mui/material';
 import AddBook from './forms/AddBook';
 import PopulateBooks from './forms/PopulateBooks';
 
 const Catalog = () => {
   const { books, lendBook, returnBook, members } = useLibrary();
   const [search, setSearch] = useState('');
-  const [lendMember, setLendMember] = useState('');
-  const [lendError, setLendError] = useState('');
+  // track selected member per-book so each card maintains its own selection
+  const [lendMember, setLendMember] = useState({});
+  // track lend errors per-book (kept for possible inline usage)
+  const [lendError, setLendError] = useState({});
+  // centralized snackbar for messages
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const filteredBooks = books.filter(book => book.title.toLowerCase().includes(search.toLowerCase()));
 
   const handleLend = (bookId) => {
-    if (!lendMember) {
-      setLendError('Please select a member');
+    const selected = lendMember[bookId];
+    if (!selected) {
+      setSnackbar({ open: true, message: 'Please select a member', severity: 'error' });
       return;
     }
-    lendBook(bookId, parseInt(lendMember));
-    setLendMember('');
-    setLendError('');
+    const result = lendBook(bookId, Number(selected));
+    if (!result || !result.ok) {
+      setSnackbar({ open: true, message: result ? result.reason : 'Unknown error', severity: 'error' });
+      return;
+    }
+    // success (lent or waitlisted) — show snackbar and clear selection
+    setSnackbar({ open: true, message: result.action === 'lent' ? 'Book lent successfully' : 'Added to waitlist', severity: 'success' });
+    setLendMember(prev => ({ ...prev, [bookId]: '' }));
+  };
+
+  const handleCloseSnackbar = () => setSnackbar(prev => ({ ...prev, open: false }));
+
+  const handleReturnClick = (bookId) => {
+    const result = returnBook(bookId);
+    if (!result || !result.ok) {
+      setSnackbar({ open: true, message: result ? result.reason : 'Unknown error', severity: 'error' });
+      return;
+    }
+    if (result.action === 'promoted') {
+      setSnackbar({ open: true, message: `Book auto-lent to member ${result.toMember}`, severity: 'info' });
+    } else {
+      setSnackbar({ open: true, message: 'Book returned and available', severity: 'success' });
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Catalog</h1>
+    <div>
+      <Typography variant="h4" gutterBottom>Catalog</Typography>
       <AddBook />
       <PopulateBooks />
-      <input
-        type="text"
-        placeholder="Search by title"
+      <TextField
+        label="Search by title"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        className="border p-2 w-full"
+        fullWidth
+        margin="normal"
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <Grid container spacing={2}>
         {filteredBooks.map(book => (
-          <div key={book.id} className="bg-white p-4 rounded shadow">
-            <h2 className="font-bold">{book.title}</h2>
-            <p>by {book.author}</p>
-            <p>Tags: {book.tags.join(', ')}</p>
-            <p className={book.status === 'available' ? 'text-green-600' : 'text-red-600'}>Status: {book.status}</p>
-            {book.status === 'available' && (
-              <div>
-                {lendError && <p className="text-red-500">{lendError}</p>}
-                <select
-                  value={lendMember}
-                  onChange={e => setLendMember(e.target.value)}
-                  className="border p-2 mr-2"
-                >
-                  <option value="">Select Member</option>
-                  {members.map(member => (
-                    <option key={member.id} value={member.id}>{member.firstName} {member.lastName}</option>
-                  ))}
-                </select>
-                <button onClick={() => handleLend(book.id)} className="bg-green-500 text-white px-4 py-2 rounded">Lend</button>
-              </div>
-            )}
-            {book.status === 'loaned' && (
-              <button onClick={() => returnBook(book.id)} className="bg-red-500 text-white px-4 py-2 rounded">Return</button>
-            )}
-            {book.waitlist.length > 0 && <p className="text-yellow-600">Waitlist: {book.waitlist.length}</p>}
-          </div>
+          <Grid key={book.id} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">{book.title}</Typography>
+                <Typography>by {book.author}</Typography>
+                <Typography>Tags: {book.tags.join(', ')}</Typography>
+                <Typography color={book.status === 'available' ? 'success.main' : 'error.main'}>
+                  Status: {book.status}
+                </Typography>
+                {book.status === 'available' && (
+                  <div>
+                    <FormControl fullWidth margin="normal">
+                      <InputLabel id={`select-member-label-${book.id}`}>Select Member</InputLabel>
+                      <Select
+                        labelId={`select-member-label-${book.id}`}
+                        value={lendMember[book.id] || ''}
+                        onChange={e => setLendMember(prev => ({ ...prev, [book.id]: e.target.value }))}
+                      >
+                        {members.map(member => (
+                          <MenuItem key={member.id} value={member.id}>{member.firstName} {member.lastName}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <Button variant="contained" color="primary" onClick={() => handleLend(book.id)}>Lend</Button>
+                  </div>
+                )}
+                {book.status === 'loaned' && (
+                  <Button variant="contained" color="secondary" onClick={() => handleReturnClick(book.id)}>Return</Button>
+                )}
+                {book.waitlist.length > 0 && <Typography color="warning.main">Waitlist: {book.waitlist.length}</Typography>}
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </div>
+      </Grid>
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
